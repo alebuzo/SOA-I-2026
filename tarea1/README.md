@@ -51,7 +51,7 @@ flowchart TD
 
 ## Flujo de eventos
 
-```m̀ermaid
+``` mermaid
 sequenceDiagram
     participant Inventario as Inventario
     participant Prestamos as Préstamos
