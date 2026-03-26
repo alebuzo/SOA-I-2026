@@ -116,6 +116,16 @@ flowchart TB
     G -->|LoanIssued / ReturnProcessed| C
 ```
 
+**Notas sobre la arquitectura interna:**
+- **Gestor de Libros**: Coordina la gestión de libros, incluyendo agregar, actualizar y remover libros del inventario
+- **Repositorio de Libros**: Almacena la información detallada de los libros (título, autor, ISBN, etc.)
+- **Manejador de Eventos**: Procesa eventos externos como `LoanIssued` y `ReturnProcessed` para actualizar la disponibilidad
+- **Servicio de Disponibilidad**: Gestiona el estado de disponibilidad de los libros y actualiza el repositorio correspondiente
+- **Repositorio de Disponibilidad**: Almacena el estado de disponibilidad de cada libro
+- **Servicio de Búsqueda**: Permite consultar libros y su disponibilidad a través de la API
+- **API Inventario**: Punto de entrada para consultas externas sobre libros y disponibilidad
+- **Publicador de Eventos**: Emite eventos como `BookAdded`, `BookInfoUpdated` y `BookRemoved` hacia el bus de eventos
+
 ## Ciclo de estados de disponibilidad
 
 ```mermaid
