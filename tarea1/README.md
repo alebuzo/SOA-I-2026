@@ -34,6 +34,7 @@ flowchart TD
     subgraph Prestamos["Préstamos"]
         P_API[API Consulta]
         P_Prestamo[Pedir préstamo de libros]
+        P_Terminado[Finalizar préstamo]
         P_EV[Eventos: LoanIssued, LoanDueDateWarningIssued, LoanDueDateReached]
     end
 
@@ -47,6 +48,8 @@ flowchart TD
     P_EV -.->|suscrito| I_Actualizar
     R_EV -.->|suscrito| I_Actualizar
     P_API -->|consulta| R_Retorno
+    R_EV -.->|suscrito| P_Terminado
+
 ```
 
 ## Flujo de eventos
@@ -70,6 +73,7 @@ sequenceDiagram
     Bus->>Notificaciones: LoanDueDateReached
     Retornos->>Prestamos: API: Obtener préstamo
     Retornos->>Bus: ReturnProcessed
+    Bus->>Prestamos: Finalizar préstamo (from ReturnProcessed)
     Bus->>Inventario: Actualizar disponibilidad de libros (from ReturnProcessed)
     Retornos->>Bus: FineIssued
     Bus->>Notificaciones: ReturnProcessed/FineIssued
@@ -99,7 +103,4 @@ El mismo concepto cambia de significado por contexto:
 | **Multa**    | Irrelevante   | Bloqueo           | Sanción por pagar |
 
 
-**Microservicios típicos:** Inventory Service, Loan Service, Return Service, Notification Service.
-
-Pregunta: un evento puede ser consumido por dos contextos o debería ser consumido por uno primero y luego ese genera algo que el segundo consuma?
-**** Falta agregar el paso de Borrar el préstamo
+**Microservicios típicos:** Inventory Service, Loan Service, Return Service, Notification Service (this one is independant from these contexts).

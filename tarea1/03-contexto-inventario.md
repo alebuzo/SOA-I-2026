@@ -2,6 +2,23 @@
 
 ## Tabla de contenidos
 
+- [Descripción](#descripción)
+- [Responsabilidades](#responsabilidades)
+  - [Lenguaje ubicuo](#lenguaje-ubicuo)
+- [Modelo del dominio](#modelo-del-dominio)
+  - [Entidad principal: Libro](#entidad-principal-libro)
+  - [Entidad: Disponibilidad](#entidad-disponibilidad)
+  - [Lo que el contexto no sabe](#lo-que-el-contexto-no-sabe)
+- [Eventos](#eventos)
+  - [Eventos emitidos](#eventos-emitidos-publicados-por-este-contexto)
+  - [Eventos consumidos](#eventos-consumidos)
+- [Diagramas](#diagramas)
+  - [Comunicación interna del contexto](#comunicación-interna-del-contexto)
+  - [Ciclo de estados de disponibilidad](#ciclo-de-estados-de-disponibilidad)
+  - [Relación entre Libro y Disponibilidad](#relación-entre-libro-y-disponibilidad)
+  - [Comunicación con otros contextos](#comunicación-con-otros-contextos)
+- [Resumen](#resumen)
+
 
 ## Descripción
 
