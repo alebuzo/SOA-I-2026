@@ -24,7 +24,7 @@ El inventario de libros maneja cuáles libros existen en la biblioteca. Define s
 
 ### Entidad principal: Libro
 
-Un **Libro** es una copia física de un libro con cierto ISBN, edición, título, autor, etc que puede estar o no disponible para préstamos.
+Un **Libro** es una copia física de un libro con cierto ISBN, edición, título, autor, etc.
 
 ```
 Libro {
@@ -33,8 +33,21 @@ Libro {
     autor,
     isbn,
     edicion,
-    disponibilidad,
     notas
+}
+```
+
+### Entidad: Disponibilidad
+
+La **Disponibilidad** representa el estado actual de préstamo de un libro específico.
+
+```
+Disponibilidad {
+    id,
+    libroId,  // FK to Libro.id
+    disponible,   // True, False
+    razon,    // LOANED, RESTORATION, HIGH_VALUE, etc.
+    fechaActualizacion
 }
 ```
 
@@ -73,17 +86,105 @@ flowchart TB
         direction TB
         A[Gestor de Libros] --> B[(Repositorio de Libros)]
         A --> C[Servicio de Disponibilidad]
-        C --> B
-        D[Servicio de Búsqueda] --> B
-        D --> C
-        E[API Inventario] --> A
+        C --> D[(Repositorio de Disponibilidad)]
+        E[Servicio de Búsqueda] --> B
         E --> D
-        F[Manejador de Eventos] --> C
-        G[Publicador de Eventos] --> A
-        G --> C
+        F[API Inventario] --> A
+        F --> E
+        G[Manejador de Eventos] --> C
+        H[Publicador de Eventos] --> A
     end
 
-    A -->|BookAdded / BookInfoUpdated / BookRemoved| G
-    F -->|LoanIssued / ReturnProcessed| C
+    A -->|BookAdded / BookInfoUpdated / BookRemoved| H
+    G -->|LoanIssued / ReturnProcessed| C
 ```
+
+## Ciclo de estados de disponibilidad
+
+```mermaid
+stateDiagram-v2
+    [*] --> Disponible: Libro agregado
+    Disponible --> No_Disponible: LoanIssued
+    No_Disponible --> Disponible: ReturnProcessed
+    Disponible --> [*]: Libro removido
+    No_Disponible --> [*]: Libro removido
+```
+
+## Relación entre Libro y Disponibilidad
+
+```mermaid
+erDiagram
+    Libro {
+        string id PK
+        string titulo
+        string autor
+        string isbn
+        string edicion
+        string notas
+    }
+
+    Disponibilidad {
+        string id PK
+        string libroId FK
+        boolean disponible
+        string razon
+        datetime fechaActualizacion
+    }
+
+    Libro ||--o{ Disponibilidad : "tiene"
+```
+
+
+## Comunicación con otros contextos
+
+``` mermaid
+sequenceDiagram
+    participant Inventario as Inventario
+    participant Prestamos as Préstamos
+    participant Retornos as Retornos
+    participant Bus as Bus de Eventos
+
+    Inventario->>Bus: BookAdded, BookInfoUpdated, BookRemoved
+    Bus->>Prestamos: (suscripción)
+    Prestamos->>Inventario: API: Obtener disponibilidad de libros
+    Prestamos->>Bus: LoanIssued
+    Bus->>Inventario: Actualizar disponibilidad de libros (from LoanIssued)
+    Retornos->>Bus: ReturnProcessed
+    Bus->>Inventario: Actualizar disponibilidad de libros (from ReturnProcessed)
+```
+
+Los otros dos contextos, Retornos y Préstamos son los que emiten los eventos que actualizan la disponibilidad de un libro.
+
+```mermaid
+flowchart LR
+    subgraph Inventario["Inventario de Libros"]
+        API[API Consulta]
+        EV[Eventos: LibroAdded, BookInfoUpdated, BookRemoved]
+        D[Servicio de Disponibilidad]
+    end
+
+    subgraph Prestamos["Préstamos"]
+        CP[Confirmar Prestamo]
+        PV[Eventos: LoanIssued]
+    end
+
+    subgraph Retornos["Retornos"]
+        GR[Gestionar Retorno]
+        RV[Eventos: ReturnProcessed]
+    end
+
+    API -->|Consulta producto, precio, categoría| CP
+    EV -->|Suscrito| CP
+    D -->|Suscrito| RV
+    D -->|Suscrito| PV
+```
+
+## Resumen
+
+| Aspecto             | Detalle                                                                   |
+| ------------------- | ------------------------------------------------------------------------- |
+| **Responsabilidad** | Gestionar el inventario de libros y sus especificaciones y disponibilidad |
+| **Libro**           | Copia física de un libro                                                  |
+| **Comunicación**    | Emite eventos de cambios de información de los libros; expone API de consulta para Préstamos |
+| **Independencia**   | La disponilidad depende de los contextos retornos y préstamos             |      
 
