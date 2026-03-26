@@ -90,7 +90,7 @@ sequenceDiagram
 
 ## Resumen de cada contexto
 
-- **Inventario**: Libro = Propiedad disponible o no disponible en la biblioteca. Libro (`id`, `titulo`, `isbn`, `autor`). No sabe de préstamos o retornos, solo si el libro está o no. Estados: AVAILABLE o NOT_AVAILABLE
+- **Inventario**: Libro = Propiedad disponible o no disponible en la biblioteca. Libro (`id`, `title`, `isbn`, `author`). No sabe de préstamos o retornos, solo si el libro está o no. Estados: AVAILABLE o NOT_AVAILABLE
 - **Préstamos**: Libro = Objeto fuera de la biblioteca. Compromete al usuario. `loanItem {loanId, client, books, loanDueDate}`
 - **Retornos**: Libro = Objeto vuelve a la biblioteca. Libera al usuario y/o le genera multas. `returnItem {returnId, loanId, client, fineAmount}`.
 

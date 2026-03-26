@@ -46,11 +46,11 @@ Un **Libro** es una copia física de un libro con cierto ISBN, edición, título
 ```
 Libro {
     id,
-    titulo,
-    autor,
+    title,
+    author,
     isbn,
-    edicion,
-    notas
+    edition,
+    notes
 }
 ```
 
@@ -61,10 +61,10 @@ La **Disponibilidad** representa el estado actual de préstamo de un libro espec
 ```
 Disponibilidad {
     id,
-    libroId,  // FK to Libro.id
-    disponible,   // True, False
-    razon,    // LOANED, RESTORATION, HIGH_VALUE, etc.
-    fechaActualizacion
+    bookId,  // FK to Libro.id
+    available,   // True, False
+    reason,    // LOANED, RESTORATION, HIGH_VALUE, etc.
+    lastUpdated
 }
 ```
 
@@ -102,13 +102,13 @@ flowchart TB
     subgraph Inventario["Contexto: Inventario de Libros"]
         direction TB
         A[Gestor de Libros] --> B[(Repositorio de Libros)]
+        G[Manejador de Eventos]
         A --> C[Servicio de Disponibilidad]
         C --> D[(Repositorio de Disponibilidad)]
         E[Servicio de Búsqueda] --> B
         E --> D
         F[API Inventario] --> A
         F --> E
-        G[Manejador de Eventos] --> C
         H[Publicador de Eventos] --> A
     end
 
@@ -120,11 +120,11 @@ flowchart TB
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Disponible: Libro agregado
-    Disponible --> No_Disponible: LoanIssued
-    No_Disponible --> Disponible: ReturnProcessed
-    Disponible --> [*]: Libro removido
-    No_Disponible --> [*]: Libro removido
+    [*] --> Available: Libro agregado
+    Available --> Unavailable: LoanIssued
+    Unavailable --> Available: ReturnProcessed
+    Available --> [*]: Libro removido
+    Unavailable --> [*]: Libro removido
 ```
 
 ## Relación entre Libro y Disponibilidad
@@ -133,19 +133,19 @@ stateDiagram-v2
 erDiagram
     Libro {
         string id PK
-        string titulo
-        string autor
+        string title
+        string author
         string isbn
-        string edicion
-        string notas
+        string edition
+        string notes
     }
 
     Disponibilidad {
         string id PK
-        string libroId FK
-        boolean disponible
-        string razon
-        datetime fechaActualizacion
+        string bookId FK
+        boolean available
+        string reason
+        datetime lastUpdated
     }
 
     Libro ||--o{ Disponibilidad : "tiene"
@@ -203,5 +203,5 @@ flowchart LR
 | **Responsabilidad** | Gestionar el inventario de libros y sus especificaciones y disponibilidad |
 | **Libro**           | Copia física de un libro                                                  |
 | **Comunicación**    | Emite eventos de cambios de información de los libros; expone API de consulta para Préstamos |
-| **Independencia**   | La disponilidad depende de los contextos retornos y préstamos             |      
+| **Independencia**   | La disponibilidad depende de los contextos retornos y préstamos           |      
 
