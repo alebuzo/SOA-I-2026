@@ -1,0 +1,10 @@
+summary: Obtiene todos los libros disponiblesen el inventario
+tags:
+  - Inventario
+responses:
+  200:
+    description: Lista de libros disponibles en el inventario
+    schema:
+      type: array
+      items:
+        $ref: "#/definitions/Book"

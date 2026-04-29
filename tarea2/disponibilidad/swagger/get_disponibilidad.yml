@@ -1,0 +1,16 @@
+summary: Obtiene la disponibilidad de un libro mediante su bookId.
+tags:
+  - Disponibilidad
+parameters:
+  - name: book_id
+    in: path
+    type: integer
+    required: true
+    description: ID del libro
+responses:
+  200:
+    description: Disponibilidad del libro obtenida con éxito
+    schema:
+      $ref: "#/definitions/Disponibilidad"
+  404:
+    description: Libro no encontrado

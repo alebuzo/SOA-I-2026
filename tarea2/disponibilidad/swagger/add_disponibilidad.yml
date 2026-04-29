@@ -1,0 +1,14 @@
+summary: Genera un nuevo registro de disponibilidad para un libro.
+tags:
+  - Disponibilidad
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      $ref: "#/definitions/Disponibilidad"
+responses:
+  201:
+    description: Disponibilidad agregada
+  400:
+    description: Error al validar los datos enviados

@@ -1,0 +1,21 @@
+summary: Actualiza la disponibilidad de un libro mediante su bookId.
+tags:
+  - Disponibilidad
+parameters:
+  - name: book_id
+    in: path
+    required: true
+    description: ID del libro vinculado
+    type: integer
+  - name: body
+    in: body
+    required: true
+    schema:
+      $ref: "#/definitions/Disponibilidad"
+responses:
+  200:
+    description: Disponibilidad actualizada con éxito
+  400:
+    description: Error de validación en los datos enviados
+  404:
+    description: No se encontró el libro
