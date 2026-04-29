@@ -19,7 +19,7 @@ logging.basicConfig(
     ]
 )
 
-disp_service = os.getenv('DISP_SERVICE')
+inventario_service = os.getenv('INVENTARIO_SERVICE')
 
 ##################################
 # Llenar base de datos con Faker #
@@ -96,22 +96,24 @@ class QueryPrestamo:
 class MutatePrestamo:
     @strawberry.mutation
     def add_prestamo(self, input: CrearPrestamoInput) -> PrestamoGraphQL:
-        # Verificar que los libros estén disponibles antes de crear el préstamo
+        # Verificar que existe una copia del libro en el inventario, tomar su bookId y consultar su disponibilidad
+        response = requests.get(f'{inventario_service}/books/available')
+        if response.status_code != 200:
+            logging.error("Error al verificar los libros disponibles: %s", response.text)
+            raise Exception("Error al verificar los libros disponibles en la biblioteca")
+        # Comparar input.books con los libros disponibles y verificar que todos los libros solicitados estén disponibles
+        available_books = response.json()
         for book_id in input.books:
-            response = requests.get(f"{disp_service}/disponibilidad/{book_id}")
-            if response.status_code != 200:
-                logging.error("Error al verificar disponibilidad del libro con id %s: %s", book_id, response.text)
-                raise Exception(f"Error al verificar disponibilidad del libro con id {book_id}")
-            disponibilidad_info = response.json()
-            if not disponibilidad_info.get('available', False):
-                logging.warning("Libro con id %s no disponible para préstamo", book_id)
+            if not any(str(book['bookId']) == book_id for book in available_books):
+                logging.info("Libro con id %s no disponible para préstamo", book_id)
                 raise Exception(f"Libro con id {book_id} no disponible para préstamo")
+        # Si todos los libros están disponibles, crear el préstamo
         nuevo_prestamo = Prestamo(
             loanId=next_prestamo_id_get(),
             user=input.user,
             books=input.books,
             loanDueDate=input.loanDueDate,
-            status="active"
+            status="ACTIVE"
         )
         prestamos_list.append(nuevo_prestamo)
         logging.info("Prestamo con id %d creado para usuario %s", nuevo_prestamo.loanId, nuevo_prestamo.user)

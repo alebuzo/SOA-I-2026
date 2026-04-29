@@ -1,0 +1,21 @@
+summary: Actualiza los datos de un libro mediante su bookId.
+tags:
+  - Inventario
+parameters:
+  - name: book_id
+    in: path
+    required: true
+    description: ID del libro
+    type: integer
+  - name: body
+    in: body
+    required: true
+    schema:
+      $ref: "#/definitions/Book"
+responses:
+  200:
+    description: Libro actualizado con éxito
+  400:
+    description: Error de validación en los datos enviados
+  404:
+    description: No se encontró el libro

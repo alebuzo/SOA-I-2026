@@ -1,0 +1,28 @@
+services:
+  disponibilidad:
+    build: disponibilidad/.
+    container_name: disponibilidad
+    ports:
+      - "5000:5000"
+    restart: always
+    hostname: disponibilidad
+
+  inventario:
+    build: inventario/.
+    container_name: inventario
+    ports:
+      - "5001:5000"
+    restart: always
+    hostname: inventario
+    environment:
+      "DISP_SERVICE": http://disponibilidad:5000
+
+  prestamos:
+    build: prestamos/.
+    container_name: prestamos
+    ports:
+      - "5002:5000"
+    restart: always
+    hostname: prestamos
+    environment:
+      "INVENTARIO_SERVICE": http://inventario:5000

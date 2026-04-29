@@ -1,5 +1,6 @@
 import os
 import requests
+import logging
 from faker import Faker
 from flasgger import Swagger, swag_from
 from flask import Flask, request, jsonify
@@ -11,6 +12,14 @@ from schema import book_schema
 app = Flask(__name__)
 
 disp_service = os.getenv("DISP_SERVICE")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 ###########
 # Swagger #
@@ -91,10 +100,11 @@ def get_books():
         availability_data = response.json()
         for book in books_list:
             availability_info = next((av for av in availability_data if av['bookId'] == book.bookId), None)
-            book.availability = availability_info['available'] if availability_info else None
+            book.available = availability_info['available'] if availability_info else None
         return jsonify([book.dict() for book in books_list])
     else:
-        return jsonify({"error": "Could not retrieve availability information"}), response.status_code
+        logging.error("No se pudo recuperar la información de disponibilidad de los libros: %s", response.text)
+        return jsonify({"error": "No se pudo recuperar la información de disponibilidad"}), response.status_code
 
 @app.route('/books/available', methods=['GET'])
 @swag_from('swagger/get_books_available.yaml')
@@ -105,7 +115,8 @@ def get_books_available():
         available_books = [book for book in books_list if book.bookId in [av['bookId'] for av in availability_data if av['available']]]
         return jsonify([book.dict() for book in available_books])
     else:
-        return jsonify({"error": "Could not retrieve availability information"}), response.status_code
+        logging.error("No se pudo recuperar la información de disponibilidad de los libros: %s", response.text)
+        return jsonify({"error": "No se pudo recuperar la información de disponibilidad"}), response.status_code
 
 
 @app.route('/books', methods=['POST'])
@@ -116,8 +127,10 @@ def add_book():
         loaded_data['bookId'] = next_book_id_get()
         new_book = Book(**loaded_data)
         books_list.append(new_book)
+        logging.info("Libro con id %d creado", new_book.bookId)
         return book_schema.dump(new_book.dict()), 201
     except ValidationError as err:
+        logging.error("Error de validación: %s", err.messages)
         return jsonify(err.messages), 400
 
 
@@ -126,11 +139,15 @@ def add_book():
 def get_book(book_id: int):
     book = next((b for b in books_list if b.bookId == book_id), None)
     if book is not None:
+        logging.info("Llamando al servicio de disponibilidad para bookId %d", book_id)
         response = requests.get(f"{disp_service}/disponibilidad/{book_id}")
         if response.status_code == 200:
             availability_info = response.json()
-            book.availability = availability_info['available']
-        return book_schema.dump(book.dict()), 200
+            book.available = availability_info.get('available')
+            return book_schema.dump(book.dict()), 200
+        logging.error("No se pudo obtener disponibilidad para bookId %d: %s", book_id, response.text)
+        return jsonify({"error": "No se pudo obtener la disponibilidad del libro"}), response.status_code
+    logging.info("Libro con id %d no encontrado", book_id)
     return jsonify({"message": "Libro no encontrado"}), 404
 
 @app.route('/books/<int:book_id>', methods=['PUT'])
@@ -138,14 +155,17 @@ def get_book(book_id: int):
 def update_book(book_id: int):
     book = next((b for b in books_list if b.bookId == book_id), None)
     if not book:
+        logging.info("Libro con id %d no encontrado", book_id)
         return jsonify({"message": "Libro no encontrado"}), 404
 
     try:
         loaded_data = book_schema.load(request.get_json(), partial=True)
         for key, value in loaded_data.items():
             setattr(book, key, value)
+        logging.info("Libro con id %d actualizado", book_id)
         return book_schema.dump(book.dict()), 200
     except ValidationError as err:
+        logging.error("Error de validación: %s", err.messages)
         return jsonify(err.messages), 400
 
 @app.route('/books/<int:book_id>', methods=['DELETE'])
@@ -154,7 +174,9 @@ def delete_book(book_id: int):
     book = next((b for b in books_list if b.bookId == book_id), None)
     if book:
         books_list.remove(book)
+        logging.info("Libro con id %d eliminado", book_id)
         return jsonify({"message": "Libro eliminado."}), 200
+    logging.info("Libro con id %d no encontrado", book_id)
     return jsonify({"message": "Libro no encontrado"}), 404
 
 # Iniciar la aplicación

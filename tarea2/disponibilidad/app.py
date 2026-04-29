@@ -1,3 +1,4 @@
+import logging
 from faker import Faker
 from datetime import datetime
 from flasgger import Swagger, swag_from
@@ -10,6 +11,14 @@ from schema import disponibilidad_schema
 opciones = ['LOANED', 'RESTORATION', 'HIGH_VALUE', 'UNIQUE_COPY', 'LOST', 'OTHER']
 
 app = Flask(__name__)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 ###########
 # Swagger #
@@ -91,6 +100,7 @@ def add_disponibilidad(book_id: int):
         disponibilidad_list.append(new_disponibilidad)
         return disponibilidad_schema.dump(new_disponibilidad), 201
     except ValidationError as err:
+        logging.error("Error de validación: %s", err.messages)
         return jsonify(err.messages), 400
 
 
@@ -100,6 +110,7 @@ def get_disponibilidad(book_id: int):
     for disponibilidad in disponibilidad_list:
         if disponibilidad.bookId == book_id:
             return disponibilidad_schema.dump(disponibilidad), 200
+    logging.info("Disponibilidad para bookId %d NO encontrada", book_id)
     return jsonify({"message": "Disponibilidad no encontrada para el bookId dado."}), 404
 
 
@@ -127,6 +138,7 @@ def update_disponibilidad(book_id: int):
 
         disponibilidad.lastUpdated = datetime.now()
         return disponibilidad_schema.dump(disponibilidad), 200
+    logging.info("Disponibilidad para bookId %d NO encontrada", book_id)
     return jsonify({"message": "Disponibilidad no encontrada para el bookId dado."}), 404
 
 
@@ -136,7 +148,9 @@ def delete_disponibilidad(book_id: int):
     disponibilidad = next((d for d in disponibilidad_list if d.bookId == book_id), None)
     if disponibilidad:
         disponibilidad_list.remove(disponibilidad)
+        logging.info("Disponibilidad para bookId %d eliminada", book_id)
         return jsonify({"message": "Disponibilidad eliminada."}), 200
+    logging.info("Disponibilidad para bookId %d NO encontrada", book_id)
     return jsonify({"message": "Disponibilidad no encontrada para el bookId dado."}), 404
 
 

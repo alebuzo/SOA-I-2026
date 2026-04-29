@@ -12,8 +12,8 @@ class Book(BaseModel):
     isbn: str = Field(..., example="978-0-14-138075-9")
     edition: int = Field(..., example=2)
     notes: Optional[str] = Field(None, example="Libro en buen estado")
-    # Ref a clase Availability
-    availability: Optional[str] = None
+    # Ref a clase Disponibilidad para obtener el estado de disponibilidad del libro
+    available: Optional[bool] = None
 
 
 ############################

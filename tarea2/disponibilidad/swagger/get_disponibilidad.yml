@@ -13,4 +13,4 @@ responses:
     schema:
       $ref: "#/definitions/Disponibilidad"
   404:
-    description: Libro no encontrado
+    description: Registro de disponibilidad no encontrado

@@ -1,0 +1,18 @@
+summary: Agrega un libro al inventario
+tags:
+  - Inventario
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      $ref: "#/definitions/Disponibilidad"
+responses:
+  200:
+    description: Agrega un libro al inventario
+    schema:
+      type: array
+      items:
+        $ref: "#/definitions/Book"
+  400:
+    description: Error al validar los datos enviados

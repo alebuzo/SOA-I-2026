@@ -1,0 +1,16 @@
+summary: Obtiene un libro mediante su bookId.
+tags:
+  - Inventario
+parameters:
+  - name: book_id
+    in: path
+    type: integer
+    required: true
+    description: ID del libro
+responses:
+  200:
+    description: Libro obtenido con éxito
+    schema:
+      $ref: "#/definitions/Book"
+  404:
+    description: Libro no encontrado
