@@ -22,7 +22,7 @@ class Book(BaseModel):
 
 books_list: List[Book] = []
 
-_book_id_counter = 1
+_book_id_counter = 5
 
 book_1 = Book(
     bookId=1,

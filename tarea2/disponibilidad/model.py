@@ -25,7 +25,7 @@ class Disponibilidad(BaseModel):
 ############################
 
 disponibilidad_list: List[Disponibilidad] = []
-_disponibilidad_id_counter = 1
+_disponibilidad_id_counter = 7
 
 disponibilidad_1 = Disponibilidad(
     disponibilidadId=5,

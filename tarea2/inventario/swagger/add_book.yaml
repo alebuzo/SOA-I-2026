@@ -6,13 +6,32 @@ parameters:
     in: body
     required: true
     schema:
-      $ref: "#/definitions/Disponibilidad"
+      type: object
+      required:
+        - title
+        - author
+        - isbn
+        - edition
+      properties:
+        title:
+          type: string
+          example: "How I Live Now"
+        author:
+          type: string
+          example: "Meg Rosoff"
+        isbn:
+          type: string
+          example: "978-0-14-138075-9"
+        edition:
+          type: integer
+          example: 1
+        notes:
+          type: string
+          example: "Libro en buen estado"
 responses:
-  200:
-    description: Agrega un libro al inventario
+  201:
+    description: Libro agregado al inventario
     schema:
-      type: array
-      items:
-        $ref: "#/definitions/Book"
+      $ref: "#/definitions/Book"
   400:
     description: Error al validar los datos enviados

@@ -2,11 +2,30 @@ summary: Genera un nuevo registro de disponibilidad para un libro.
 tags:
   - Disponibilidad
 parameters:
+  - name: book_id
+    in: path
+    type: integer
+    required: true
+    description: ID del libro
   - name: body
     in: body
     required: true
     schema:
-      $ref: "#/definitions/Disponibilidad"
+      type: object
+      required:
+        - bookId
+        - available
+      properties:
+        bookId:
+          type: integer
+          example: 5
+        available:
+          type: boolean
+          example: true
+        reason:
+          type: string
+          example: "LOANED"
+          enum: ["LOANED", "RESTORATION", "HIGH_VALUE", "UNIQUE_COPY", "LOST", "OTHER"]
 responses:
   201:
     description: Disponibilidad agregada

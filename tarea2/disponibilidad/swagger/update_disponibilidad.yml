@@ -11,7 +11,15 @@ parameters:
     in: body
     required: true
     schema:
-      $ref: "#/definitions/Disponibilidad"
+      type: object
+      properties:
+        available:
+          type: boolean
+          example: true
+        reason:
+          type: string
+          example: "LOANED"
+          enum: ["LOANED", "RESTORATION", "HIGH_VALUE", "UNIQUE_COPY", "LOST", "OTHER"]
 responses:
   200:
     description: Disponibilidad actualizada con éxito

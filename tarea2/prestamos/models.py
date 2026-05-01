@@ -1,33 +1,26 @@
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 
 class Prestamo(BaseModel):
     """
     Represents a book loan in the library system.
-
-    Attributes:
-        loanId (int): Unique identifier for the loan.
-        user (str): The name or ID of the user who borrowed the books.
-        books (list[str]): List of book IDs that were borrowed.
-        loanDueDate (date): The due date for returning the books.
-        status (str): Current state of the loan (e.g., "active", "returned").
     """
-    loanId: int
-    user: str
-    books: list[str]
-    loanDueDate: date
-    status: str
+    loanId: int = Field(..., description="Identificador único del préstamo")
+    user: str = Field(..., description="Nombre o ID del usuario que solicitó el préstamo")
+    books: list[str] = Field(..., description="Lista de IDs de libros prestados")
+    loanDueDate: date = Field(..., description="Fecha de vencimiento del préstamo (formato: YYYY-MM-DD)")
+    status: str = Field(..., description="Estado actual del préstamo (ACTIVE, ARCHIVED, FINALIZED)")
 
 ############################
 # Base de datos en memoria #
 ############################
 
 prestamos_list: List[Prestamo] = []
-_prestamos_id_counter = 1
+_prestamos_id_counter = 2
 
 prestamo_1 = Prestamo(
-    loanId=20,
+    loanId=1,
     user="Xavier Benitez",
     books=["4"],
     loanDueDate=date(2026, 12, 31),
