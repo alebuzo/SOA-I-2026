@@ -26,6 +26,17 @@ class Prestamo(BaseModel):
 prestamos_list: List[Prestamo] = []
 _prestamos_id_counter = 1
 
+prestamo_1 = Prestamo(
+    loanId=20,
+    user="Xavier Benitez",
+    books=["4"],
+    loanDueDate=date(2026, 12, 31),
+    status="active"
+)
+
+# Agregar préstamos iniciales a la lista
+prestamos_list.append(prestamo_1)
+
 #################################
 # Helpers para la base de datos #
 #################################

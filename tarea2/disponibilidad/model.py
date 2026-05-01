@@ -13,7 +13,7 @@ class Disponibilidad(BaseModel):
     available: bool = Field(..., example=True)
     reason: Optional[str] = Field(None, example="ON LOAN")
     # Use current time
-    lastUpdated: datetime = Field(default_factory=datetime.utcnow)
+    lastUpdated: datetime = Field(default_factory=datetime.now())
 
     class Config:
         json_encoders = {
@@ -26,6 +26,30 @@ class Disponibilidad(BaseModel):
 
 disponibilidad_list: List[Disponibilidad] = []
 _disponibilidad_id_counter = 1
+
+disponibilidad_1 = Disponibilidad(
+    disponibilidadId=5,
+    bookId=1,
+    available=True,
+    reason=None,
+    lastUpdated=datetime.now()
+)
+disponibilidad_2 = Disponibilidad(
+    disponibilidadId=6,
+    bookId=3,
+    available=True,
+    reason=None,
+    lastUpdated=datetime.now()
+)
+disponibilidad_3 = Disponibilidad(
+    disponibilidadId=3,
+    bookId=4,
+    available=False,
+    reason="ON LOAN",
+    lastUpdated=datetime.now()
+)
+# Agregar disponibilidades iniciales a la lista
+disponibilidad_list.extend([disponibilidad_1, disponibilidad_2, disponibilidad_3])
 
 #################################
 # Helpers para la base de datos #

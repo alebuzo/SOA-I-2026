@@ -2,7 +2,6 @@ import os
 import logging
 import strawberry
 import requests
-from faker import Faker
 from datetime import date
 from typing import Optional
 from datetime import datetime
@@ -21,44 +20,29 @@ logging.basicConfig(
 
 inventario_service = os.getenv('INVENTARIO_SERVICE')
 
-##################################
-# Llenar base de datos con Faker #
-##################################
-
-faker = Faker()
-for i in range(1, 7):
-    prestamos_list.append(Prestamo(
-        loanId=next_prestamo_id_get(),
-        user=faker.name(),
-        books=[str(faker.random_int(min=1, max=100)) for _ in range(faker.random_int(min=1, max=5))],
-        loanDueDate=faker.date_between(start_date='today', end_date='+30d'),
-        status=faker.random_element(elements=["ACTIVE", "ARCHIVED", "FINALIZED"])
-    ))
-
-
-@pydantic_type(model=Prestamo, all_fields=True)
+@pydantic_type(model=Prestamo, all_fields=True, description="Representa un préstamo de libros en el sistema de la biblioteca")
 class PrestamoGraphQL:
     pass
 
-@strawberry.input
+@strawberry.input(description="Input para crear un nuevo préstamo")
 class CrearPrestamoInput:
-    user: str
-    books: list[str]
-    loanDueDate: date
+    user: str = strawberry.field(description="Nombre o ID del usuario que solicita el préstamo")
+    books: list[str] = strawberry.field(description="Lista de IDs de libros a prestar")
+    loanDueDate: date = strawberry.field(description="Fecha de vencimiento del préstamo (formato: YYYY-MM-DD)")
 
-@strawberry.input
+@strawberry.input(description="Input para actualizar el estado de un préstamo existente")
 class ActualizarEstadoPrestamoInput:
-    loanId: int
-    status: str
+    loanId: int = strawberry.field(description="ID único del préstamo a actualizar")
+    status: str = strawberry.field(description="Nuevo estado del préstamo (ACTIVE, ARCHIVED, FINALIZED)")
 
-@strawberry.input
+@strawberry.input(description="Input para consultar préstamos próximos a expirar")
 class GetSoonToExpirePrestamosInput:
-    time: int
+    time: int = strawberry.field(description="Número de días para considerar 'próximo a expirar' (ej: 7 = próximos 7 días)")
 
 
-@strawberry.type
+@strawberry.type(description="Consultas disponibles para el servicio de préstamos")
 class QueryPrestamo:
-    @strawberry.field
+    @strawberry.field(description="Obtiene un préstamo específico por su ID. Retorna null si no existe.")
     def prestamo(self, loanId: int) -> Optional[PrestamoGraphQL]:
         for p in prestamos_list:
             if p.loanId == loanId:
@@ -67,11 +51,11 @@ class QueryPrestamo:
         logging.info("Prestamo con id %d NO encontrado", loanId)
         return None
 
-    @strawberry.field
+    @strawberry.field(description="Obtiene todos los préstamos existentes en el sistema")
     def prestamos(self) -> list[PrestamoGraphQL]:
         return [PrestamoGraphQL.from_pydantic(p) for p in prestamos_list]
 
-    @strawberry.field
+    @strawberry.field(description="Obtiene todos los préstamos asociados a un usuario específico")
     def prestamos_by_user(self, user: str) -> list[PrestamoGraphQL]:
         resultados = []
         prestamos_de_user = [p for p in prestamos_list if p.user == user]
@@ -79,7 +63,7 @@ class QueryPrestamo:
         logging.info("Prestamos para usuario %s encontrados: %d", user, len(resultados))
         return resultados
 
-    @strawberry.field
+    @strawberry.field(description="Obtiene todos los préstamos próximos a expirar en time días o menos")
     def get_soon_to_expire_prestamos(self, input: GetSoonToExpirePrestamosInput) -> list[PrestamoGraphQL]:
         resultados = []
         today = datetime.now().date()
@@ -92,9 +76,9 @@ class QueryPrestamo:
         logging.info("Prestamos pronto a expirar encontrados: %d", len(resultados))
         return resultados
 
-@strawberry.type
+@strawberry.type(description="Mutaciones disponibles para el servicio de préstamos")
 class MutatePrestamo:
-    @strawberry.mutation
+    @strawberry.mutation(description="Crea un nuevo préstamo de libros. Verifica que los libros solicitados estén disponibles antes de crear el préstamo.")
     def add_prestamo(self, input: CrearPrestamoInput) -> PrestamoGraphQL:
         # Verificar que existe una copia del libro en el inventario, tomar su bookId y consultar su disponibilidad
         response = requests.get(f'{inventario_service}/books/available')
@@ -119,7 +103,7 @@ class MutatePrestamo:
         logging.info("Prestamo con id %d creado para usuario %s", nuevo_prestamo.loanId, nuevo_prestamo.user)
         return PrestamoGraphQL.from_pydantic(nuevo_prestamo)
 
-    @strawberry.mutation
+    @strawberry.mutation(description="Actualiza el estado de un préstamo existente")
     def update_status_prestamo(self, input: ActualizarEstadoPrestamoInput) -> Optional[PrestamoGraphQL]:
         prestamo = next((p for p in prestamos_list if p.loanId == input.loanId), None)
         if prestamo:
@@ -129,7 +113,7 @@ class MutatePrestamo:
         logging.info("Prestamo con id %d NO encontrado", input.loanId)
         return None
 
-    @strawberry.mutation
+    @strawberry.mutation(description="Elimina un préstamo existente")
     def delete_prestamo(self, loanId: int) -> bool:
         prestamo = next((p for p in prestamos_list if p.loanId == loanId), None)
         if prestamo:
@@ -139,4 +123,5 @@ class MutatePrestamo:
         logging.info("Prestamo con id %d NO encontrado", loanId)
         return False
 
-schema = strawberry.Schema(query=QueryPrestamo, mutation=MutatePrestamo)
+schema = strawberry.Schema(query=QueryPrestamo,
+                           mutation=MutatePrestamo)

@@ -1,7 +1,6 @@
 import os
 import requests
 import logging
-from faker import Faker
 from flasgger import Swagger, swag_from
 from flask import Flask, request, jsonify
 from marshmallow import Schema, fields, ValidationError
@@ -12,6 +11,8 @@ from schema import book_schema
 app = Flask(__name__)
 
 disp_service = os.getenv("DISP_SERVICE")
+
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -72,22 +73,6 @@ swagger_template = {
 
 swagger = Swagger(app, template=swagger_template)
 
-
-##################################
-# Llenar base de datos con Faker #
-##################################
-
-faker = Faker()
-for i in range(1, 20):
-    books_list.append(Book(
-        bookId=i,
-        title=faker.sentence(nb_words=4),
-        author=faker.name(),
-        isbn=faker.isbn13(),
-        edition=faker.random_int(min=1, max=5),
-        notes=faker.sentence(nb_words=6)
-    ))
-
 ############################
 # Endpoints del inventario #
 ############################
@@ -95,6 +80,7 @@ for i in range(1, 20):
 @app.route('/books', methods=['GET'])
 @swag_from('swagger/get_books.yaml')
 def get_books():
+    logging.info("Llamando al servicio de disponibilidad para obtener todos los libros")
     response = requests.get(f"{disp_service}/disponibilidad")
     if response.status_code == 200:
         availability_data = response.json()
@@ -109,10 +95,15 @@ def get_books():
 @app.route('/books/available', methods=['GET'])
 @swag_from('swagger/get_books_available.yaml')
 def get_books_available():
+    logging.info("Llamando al servicio de disponibilidad para obtener libros disponibles")
     response = requests.get(f"{disp_service}/disponibilidad")
     if response.status_code == 200:
         availability_data = response.json()
-        available_books = [book for book in books_list if book.bookId in [av['bookId'] for av in availability_data if av['available']]]
+        available_ids = {av['bookId'] for av in availability_data if av['available']}
+        available_books = [book for book in books_list if book.bookId in available_ids]
+        for book in available_books:
+            book.available = True
+        logging.info("Libros disponibles encontrados: %d", len(available_books))
         return jsonify([book.dict() for book in available_books])
     else:
         logging.error("No se pudo recuperar la información de disponibilidad de los libros: %s", response.text)
@@ -173,7 +164,13 @@ def update_book(book_id: int):
 def delete_book(book_id: int):
     book = next((b for b in books_list if b.bookId == book_id), None)
     if book:
-        books_list.remove(book)
+        # Remover la disponibilidad asociada al libro antes de eliminarlo del inventario
+        response = requests.delete(f"{disp_service}/disponibilidad/{book_id}")
+        if response.status_code != 200:
+            logging.error("Error al eliminar la disponibilidad para bookId %d: %s", book_id, response.text)
+            return jsonify({"error": "No se pudo eliminar la disponibilidad del libro"}), response.status_code
+        logging.info("Disponibilidad para bookId %d eliminada", book_id)
+        books_list[:] = [b for b in books_list if b.bookId != book_id]
         logging.info("Libro con id %d eliminado", book_id)
         return jsonify({"message": "Libro eliminado."}), 200
     logging.info("Libro con id %d no encontrado", book_id)

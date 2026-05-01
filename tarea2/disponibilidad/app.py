@@ -71,20 +71,6 @@ swagger_template = {
 
 swagger = Swagger(app, template=swagger_template)
 
-##################################
-# Llenar base de datos con Faker #
-##################################
-
-faker = Faker()
-for i in range(1, 20):
-    disponibilidad_list.append(Disponibilidad(
-        disponibilidadId=faker.random_int(min=1, max=20),
-        bookId=i,
-        available=faker.boolean(),
-        reason=faker.random_element(elements=opciones),
-        lastUpdated=faker.date_time_this_year()
-    ))
-
 ############################
 # Endpoints del inventario #
 ############################
@@ -117,6 +103,7 @@ def get_disponibilidad(book_id: int):
 @app.route('/disponibilidad/', methods=['GET'])
 @swag_from('swagger/get_all_disponibilidad.yml')
 def get_all_disponibilidad():
+    logging.info("Obteniendo todas las disponibilidades de libros")
     return jsonify([disponibilidad_schema.dump(d) for d in disponibilidad_list]), 200
 
 
