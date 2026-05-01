@@ -1,0 +1,14 @@
+summary: Elimina el registro de disponibilidad de un libro.
+tags:
+  - Disponibilidad
+parameters:
+  - name: book_id
+    in: path
+    required: true
+    description: ID del libro cuya disponibilidad será eliminada
+    type: integer
+responses:
+  200:
+    description: Eliminado exitosamente
+  404:
+    description: El registro no existe

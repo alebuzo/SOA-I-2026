@@ -1,0 +1,10 @@
+summary: Obtiene todos las disponibilidades
+tags:
+  - Disponibilidad
+responses:
+  200:
+    description: Lista de disponibilidades de los libros
+    schema:
+      type: array
+      items:
+        $ref: "#/definitions/Disponibilidad"
