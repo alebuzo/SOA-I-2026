@@ -1,0 +1,60 @@
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ messaging
+      - "15672:15672" # RabbitMQ management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    hostname: rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  disponibilidad:
+    build: disponibilidad/.
+    container_name: disponibilidad
+    ports:
+      - "5000:5000"
+    restart: always
+    hostname: disponibilidad
+    environment:
+      "RABBITMQ_HOST": "rabbitmq"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  inventario:
+    build: inventario/.
+    container_name: inventario
+    ports:
+      - "5001:5000"
+    restart: always
+    hostname: inventario
+    environment:
+      "DISP_SERVICE": http://disponibilidad:5000
+      "RABBITMQ_HOST": "rabbitmq"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+  prestamos:
+    build: prestamos/.
+    container_name: prestamos
+    ports:
+      - "5002:5000"
+    restart: always
+    hostname: prestamos
+    environment:
+      "INVENTARIO_SERVICE": http://inventario:5000
+      "RABBITMQ_HOST": "rabbitmq"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+

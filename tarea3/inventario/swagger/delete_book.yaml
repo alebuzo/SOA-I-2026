@@ -1,0 +1,14 @@
+summary: Elimina un libro.
+tags:
+  - Inventario
+parameters:
+  - name: book_id
+    in: path
+    required: true
+    description: ID del libro que será eliminado
+    type: integer
+responses:
+  200:
+    description: Eliminado exitosamente
+  404:
+    description: El libro no existe
