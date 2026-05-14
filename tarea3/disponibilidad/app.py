@@ -1,5 +1,6 @@
 import os
 import pika
+import json
 import logging
 from faker import Faker
 from datetime import datetime
@@ -79,15 +80,9 @@ swagger = Swagger(app, template=swagger_template)
 # Mensajería Asíncrona #
 ########################
 
-@app.route('/rabbitmq', methods=['GET'])
+@app.route('/disponibilidad/rabbitmq', methods=['GET'])
+@swag_from('swagger/rabbitmq.yml')
 def rabbitmq():
-    """
-    Enviar la disponibilidad de los libros a RabbitMQ
-    ---
-    responses:
-      200:
-        description: Disponibilidad enviada
-    """
     data = {}
     # Send disponibilidad objects as a dictionary
     data['disponibilidades'] = [disponibilidad_schema.dump(d) for d in disponibilidad_list]
@@ -104,7 +99,7 @@ def rabbitmq():
     channel.queue_declare(queue='cola-de-disponibilidad')
     # Publicar un mensaje
     channel.basic_publish(exchange='', routing_key='cola-de-disponibilidad',
-                          body=str(data))
+                          body=json.dumps(data))
     # Cerrar la conexión
     connection.close()
     logging.info("Disponibilidad enviada a RabbitMQ: %s", data)

@@ -1,6 +1,7 @@
 import os
 import pika
 import time
+import json
 import requests
 import logging
 import threading
@@ -24,6 +25,32 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+#####################
+# Escuchar RabbitMQ #
+#####################
+
+def callback_rabbitmq(ch, method, properties, body):
+    logging.info(f"Mensaje recibido de RabbitMQ: {json.loads(body)}")
+
+
+def rabbitmq_consumer():
+    while True:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_host))
+            channel = connection.channel()
+            channel.queue_declare(queue='cola-de-disponibilidad')
+            channel.basic_consume(queue='cola-de-disponibilidad', on_message_callback=callback_rabbitmq, auto_ack=True)
+            logging.info("Esperando mensajes de RabbitMQ...")
+            channel.start_consuming()
+        except pika.exceptions.AMQPConnectionError as e:
+            logging.warning(f"No se pudo conectar a RabbitMQ: {e}. Reintentando en 5 segundos...")
+            time.sleep(5)
+
+logging.info("Iniciando hilo de RabbitMQ...")
+rabbitmq_thread = threading.Thread(target=rabbitmq_consumer, daemon=True)
+rabbitmq_thread.start()
+logging.info(f"Hilo iniciado: {rabbitmq_thread.is_alive()}")
 
 ###########
 # Swagger #
@@ -179,30 +206,6 @@ def delete_book(book_id: int):
     logging.info("Libro con id %d no encontrado", book_id)
     return jsonify({"message": "Libro no encontrado"}), 404
 
-#####################
-# Escuchar RabbitMQ #
-#####################
-
-def callback_rabbitmq(ch, method, properties, body):
-    logging.info(f"Mensaje recibido de RabbitMQ: {body.decode()}")
-
-
-def rabbitmq_consumer():
-    while True:
-        try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_host))
-            channel = connection.channel()
-            channel.queue_declare(queue='cola-de-disponibilidad')
-            channel.basic_consume(queue='cola-de-disponibilidad', on_message_callback=callback_rabbitmq, auto_ack=True)
-            logging.info("Esperando mensajes de RabbitMQ...")
-            channel.start_consuming()
-        except pika.exceptions.AMQPConnectionError as e:
-            logging.warning(f"No se pudo conectar a RabbitMQ: {e}. Reintentando en 5 segundos...")
-            time.sleep(5)
-
 # Iniciar la aplicación
 if __name__ == '__main__':
-    # Iniciar el consumidor de RabbitMQ en un hilo separado para no bloquear la aplicación Flask
-    rabbitmq_thread = threading.Thread(target=rabbitmq_consumer, daemon=True)
-    rabbitmq_thread.start()
     app.run(debug=True)

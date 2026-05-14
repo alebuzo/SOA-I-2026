@@ -14,8 +14,10 @@ MarkupSafe==3.0.3
 marshmallow==4.3.0
 mistune==3.2.0
 packaging==26.2
+pika==1.4.0
 pydantic==2.13.3
 pydantic_core==2.46.3
+python-dotenv==1.2.2
 PyYAML==6.0.3
 referencing==0.37.0
 rpds-py==0.30.0
