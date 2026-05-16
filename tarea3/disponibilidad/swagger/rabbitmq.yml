@@ -1,0 +1,22 @@
+summary: Enviar la disponibilidad de los libros a RabbitMQ
+tags:
+  - Disponibilidad
+description: Obtiene todas las disponibilidades de libros y las envía a la cola de RabbitMQ
+responses:
+  200:
+    description: Disponibilidad enviada exitosamente
+    content:
+      application/json:
+        schema:
+          type: string
+          example: "Disponibilidad enviada a RabbitMQ"
+  500:
+    description: Error al enviar a RabbitMQ
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Error de conexión con RabbitMQ"
