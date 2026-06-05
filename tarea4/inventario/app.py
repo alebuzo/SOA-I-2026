@@ -47,10 +47,13 @@ def rabbitmq_consumer():
             logging.warning(f"No se pudo conectar a RabbitMQ: {e}. Reintentando en 5 segundos...")
             time.sleep(5)
 
-logging.info("Iniciando hilo de RabbitMQ...")
-rabbitmq_thread = threading.Thread(target=rabbitmq_consumer, daemon=True)
-rabbitmq_thread.start()
-logging.info(f"Hilo iniciado: {rabbitmq_thread.is_alive()}")
+if rabbitmq_host:
+    logging.info("Iniciando hilo de RabbitMQ...")
+    rabbitmq_thread = threading.Thread(target=rabbitmq_consumer, daemon=True)
+    rabbitmq_thread.start()
+    logging.info(f"Hilo iniciado: {rabbitmq_thread.is_alive()}")
+else:
+    logging.info("RABBITMQ_HOST not set — skipping RabbitMQ consumer thread (test/dev mode)")
 
 ###########
 # Swagger #
