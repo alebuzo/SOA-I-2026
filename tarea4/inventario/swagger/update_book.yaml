@@ -1,0 +1,37 @@
+summary: Actualiza los datos de un libro mediante su bookId.
+tags:
+  - Inventario
+parameters:
+  - name: book_id
+    in: path
+    required: true
+    description: ID del libro
+    type: integer
+  - name: body
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "How I Live Now"
+        author:
+          type: string
+          example: "Meg Rosoff"
+        isbn:
+          type: string
+          example: "978-0-14-138075-9"
+        edition:
+          type: integer
+          example: 1
+        notes:
+          type: string
+          example: "Libro en buen estado"
+responses:
+  200:
+    description: Libro actualizado con éxito
+  400:
+    description: Error de validación en los datos enviados
+  404:
+    description: No se encontró el libro

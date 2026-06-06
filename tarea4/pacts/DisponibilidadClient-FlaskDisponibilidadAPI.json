@@ -1,0 +1,278 @@
+{
+  "consumer": {
+    "name": "DisponibilidadClient"
+  },
+  "interactions": [
+    {
+      "description": "GET /disponibilidad/ returns a list",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "at least one disponibilidad exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/disponibilidad/"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "available": true,
+              "bookId": 1,
+              "disponibilidadId": 1,
+              "lastUpdated": "2026-05-31T12:00:00"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$[*].bookId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].disponibilidadId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].lastUpdated": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "GET /disponibilidad/3 returns the disponibilidad",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a disponibilidad with bookId 3 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/disponibilidad/3"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "available": false,
+            "bookId": 3,
+            "disponibilidadId": 6,
+            "lastUpdated": "2026-05-31T12:00:00"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "boolean"
+                }
+              ]
+            },
+            "$.disponibilidadId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.lastUpdated": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "GET /disponibilidad/9999 returns 404",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "no disponibilidad with bookId 9999 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/disponibilidad/9999"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "message": "not found"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "POST /disponibilidad/7 creates a new disponibilidad",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "any state"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "available": false,
+            "bookId": 7,
+            "reason": "LOANED"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/disponibilidad/7"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "available": false,
+            "bookId": 7,
+            "disponibilidadId": 7,
+            "lastUpdated": "2026-05-31T12:00:00",
+            "reason": "LOANED"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.disponibilidadId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.lastUpdated": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reason": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.4",
+      "mockserver": "2.2.1",
+      "models": "1.3.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "FlaskDisponibilidadAPI"
+  }
+}
