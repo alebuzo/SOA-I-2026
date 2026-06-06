@@ -2,6 +2,8 @@
 
 ## Instrucciones
 
+### Opción 1: ejecute los tests manualmente
+
 1. Desde el directorio `tarea4/` cree un virtual environment e instale las dependencias:
    ```bash
    python3 -m venv .venv
@@ -13,6 +15,33 @@
    ```bash
    pytest tests/
    ```
+
+### Opción 2: levante un contenedor de Docker
+
+1. Desde el directorio `tarea4/` construya y levante un container de Docker, el entrypoint del contenedor ya corre los tests:
+
+```bash
+docker build -t tarea4 . && docker run tarea4
+```
+
+## Resultados
+
+En su terminal observará:
+
+```bash
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /tarea4/tests
+configfile: pytest.ini
+plugins: Faker-40.19.1
+collected 15 items
+
+tests/api/test_prestamos_api.py .....                                    [ 33%]
+tests/pact_tests/test_flask_pact_disponibilidad.py .....                 [ 66%]
+tests/pact_tests/test_flask_pact_inventario.py .....                     [100%]
+
+============================== 15 passed in 8.91s ==============================
+```
 
 ## Detalles de los tests
 
