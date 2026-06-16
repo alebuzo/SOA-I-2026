@@ -123,8 +123,9 @@ def propagate_correlation_id() -> dict:
 def add_disponibilidad(book_id: int):
     try:
         loaded_data = disponibilidad_schema.load(request.get_json())
+        # Assign an id before validating/instantiating the Pydantic model
+        loaded_data['disponibilidadId'] = next_disponibilidad_id_get()
         new_disponibilidad = Disponibilidad(**loaded_data)
-        new_disponibilidad.disponibilidadId = next_disponibilidad_id_get()
         disponibilidad_list.append(new_disponibilidad)
         return disponibilidad_schema.dump(new_disponibilidad), 201
     except ValidationError as err:

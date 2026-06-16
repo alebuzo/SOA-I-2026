@@ -13,7 +13,7 @@ class Disponibilidad(BaseModel):
     available: bool = Field(..., example=True)
     reason: Optional[str] = Field(None, example="ON LOAN")
     # Use current time
-    lastUpdated: datetime = Field(default_factory=datetime.now())
+    lastUpdated: datetime = Field(default_factory=datetime.now)
 
     class Config:
         json_encoders = {

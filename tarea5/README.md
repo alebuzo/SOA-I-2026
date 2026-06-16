@@ -17,36 +17,29 @@ flowchart TD
 
 ## Ejemplo de ruta que utiliza los 3 servicios con correlation ID:
 
-1. En http://localhost:5001/apidocs, utilice la ruta books/ para obtener todos los libros, localice el `bookId` de tres libros, donde dos de ellos tengan el atributo `"available": true` y uno tenga `"available": false`. Ejemplo:
+1. En http://localhost:5001/apidocs, utilice la ruta books/available para obtener todos los libros disponibles. Ejemplo:
 
 ```
+[
   {
-    "author": "Vanessa Bryan",
+    "author": "Meg Rosoff",
+    "available": true,
+    "bookId": 1,
+    "edition": 1,
+    "isbn": "978-0-14-138075-9",
+    "notes": "Libro en buen estado",
+    "title": "How I Live Now"
+  },
+  {
+    "author": "F. Scott Fitzgerald",
     "available": true,
     "bookId": 3,
-    "edition": 3,
-    "isbn": "978-1-57995-706-3",
-    "notes": "Activity administration force lot election very.",
-    "title": "Along explain try pattern."
-  },
-  {
-    "author": "Emily Bryan",
-    "available": true,
-    "bookId": 4,
-    "edition": 1,
-    "isbn": "978-0-595-39411-1",
-    "notes": "Television message activity him.",
-    "title": "Evidence dog."
-  },
-  {
-    "author": "Kelsey Russell",
-    "available": false,
-    "bookId": 5,
-    "edition": 3,
-    "isbn": "978-0-348-00339-0",
-    "notes": "Walk record assume make.",
-    "title": "Early perhaps."
-  },
+    "edition": 2,
+    "isbn": "978-0-7432-7356-5",
+    "notes": "Libro con algunas páginas dobladas",
+    "title": "The Great Gatsby"
+  }
+]
 ```
 
 2. En http://localhost:5002/graphql, utilice la siguiente mutación. Reemplace `books: ["BOOKID-HERE", "BOOKID-HERE"]` con los bookIds de dos libro disponibles.
